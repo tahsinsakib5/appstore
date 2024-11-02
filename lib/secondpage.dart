@@ -1,19 +1,20 @@
+import 'package:appstore/cometinputfeild.dart';
+import 'package:appstore/pojectshowpage.dart';
+import 'package:appstore/screanshort.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:dio/dio.dart';
+import 'package:intl/intl.dart';
 
 import 'dart:html' as html;
 
-import 'package:firebase_storage/firebase_storage.dart';
-
 import 'package:file_picker/file_picker.dart';
 
-
-import 'package:file_saver/file_saver.dart';
 class AppDetailPage extends StatelessWidget {
   const AppDetailPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController commentController = TextEditingController();
     return Scaffold(
       backgroundColor: Colors.grey[100],
       appBar: AppBar(
@@ -30,17 +31,53 @@ class AppDetailPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                ProjectShowPage(),
+                SizedBox(
+                  height: 40,
+                ),
                 _buildHeaderSection(context),
                 const SizedBox(height: 30),
                 _buildDescriptionSection(),
                 const SizedBox(height: 30),
                 _buildFeatureSection(),
+                
+     
+
+               CommentSection(),
+
+
+
+
+
+                CommentInputField(
+                  controller: commentController,
+                  onSend: (rating, comment) {
+                    setcoment(rating, comment);
+                    print("Rating: $rating, Comment: $comment");
+                  },
+                ),
               ],
             ),
           ),
         ),
       ),
     );
+  }
+
+
+
+  Future setcoment(int reting, String comment) async {
+    Map<String, dynamic> newcoment = {
+      "comment": comment,
+      "rating": reting,
+      "date": DateTime.now(),
+      "like":0,
+    };
+
+    await FirebaseFirestore.instance
+        .collection("setcomment")
+        .doc("X0fO6VONEG5DXsiOcpnG").update({"allcomment":FieldValue.arrayUnion([newcoment])});;
+        
   }
 
   Widget _buildHeaderSection(BuildContext context) {
@@ -78,7 +115,7 @@ class AppDetailPage extends StatelessWidget {
                 ),
               ],
             ),
-            child: const Icon(Icons.apps, color: Colors.blue, size: 50),
+            child: Image.asset("assets/logo.jpg"),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -103,23 +140,10 @@ class AppDetailPage extends StatelessWidget {
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: ElevatedButton.icon(
-                    onPressed: ()async{
-
-                        // const String url = 'https://drive.google.com/uc?id=1SoYZGrbJ0lUHNn3tvySf_YkeQqsSrG38&export=download'; // Replace with your APK URL
-                        // if (await canLaunch(url)) {
-                        //   await launch(url);
-                        //   // Show instructions after launching the URL
-                          
-                        // } else {
-                        //   throw 'Could not launch $url';
-                        // }
-
-                        
-                            
-                           
-
-                  downloadFile("https://firebasestorage.googleapis.com/v0/b/appstore-74aea.appspot.com/o/WhatsApp%20Audio%202024-10-22%20at%203.28.56%20AM.wav?alt=media&token=f17686ae-f2f1-4e8b-b7e0-36d99ffa6eee");
-
+                    onPressed: () async {
+                    
+                      downloadFile(
+                          "https://github.com/tahsinsakib5/Apk/raw/refs/heads/main/nid_1.0.4.apk");
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
@@ -136,14 +160,11 @@ class AppDetailPage extends StatelessWidget {
                     icon: const Icon(Icons.download),
                     label: const Text(
                       'Download',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ),
-
-                ElevatedButton(onPressed: () {
-                  pickFile();
-                }, child:Text("fff"))
               ],
             ),
           ),
@@ -179,6 +200,9 @@ class AppDetailPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        screanshort(screenshotUrls: [
+          "assets/image5.jpeg,assets/image2.jpeg,assets/image3.jpeg,assets/image4jpeg"
+        ]),
         const Text(
           'Features',
           style: TextStyle(
@@ -213,80 +237,258 @@ class AppDetailPage extends StatelessWidget {
     );
   }
 
-  //  Future<void> downloadAPK() async {
-  //   const String url = 'https://yourdomain.com/yourfile.apk'; // Replace with your APK URL
-  //   try {
-  //     // Get the application documents directory
-  //     Directory appDocDir = await getApplicationDocumentsDirectory();
-  //     String savePath = '${appDocDir.path}/yourfile.apk'; // Path where the file will be saved
-
-  //     // Create a Dio instance
-  //     Dio dio = Dio();
-  //     await dio.download(url, savePath, onReceiveProgress: (received, total) {
-  //       if (total != -1) {
-  //         print((received / total * 100).toStringAsFixed(0) + '%');
-  //       }
-  //     });
-
-  //     print('File downloaded to: $savePath');
-  //     // Optionally, you can open the file or notify the user
-
-  //   } catch (e) {
-  //     print('Download failed: $e');
-  //   }
-  // }
-
-//  void downloadAPK() {
-//     const String url = 'https://drive.google.com/uc?export=download&id=1SoYZGrbJ0lUHNn3tvySf_YkeQqsSrG38'; // Direct download URL
-
-//     // Create an anchor element for download
-//     final anchor = html.AnchorElement(href: url)
-//       ..setAttribute('download', 'your_apk_file.apk') // Specify the name for the downloaded file
-//       ..setAttribute('target', '_self') // Ensure it opens in the same tab
-//       ..click(); // Programmatically click the anchor to trigger the download
-//  }
-
-// Example function to start a download
 
 
-void downloadFile(String url) {
-   html.AnchorElement anchorElement =  new html.AnchorElement(href: url);
-   anchorElement.download = url;
-   anchorElement.click();
+  void downloadFile(String url) {
+    html.AnchorElement anchorElement = new html.AnchorElement(href: url);
+    anchorElement.download = url;
+    anchorElement.click();
+  }
+
+
 }
 
 
-// Future<void> downloadAndSaveFile() async {
-//   final ref = FirebaseStorage.instance.ref().child("path/to/your/file.apk");
-//   Uint8List? fileData = await ref.getData();
 
-//   if (fileData != null) {
-//     await FileSaver.instance.saveFile(
-//       "downloaded_file",
-//       fileData,
-//       "apk",
-//       mimeType: MimeType.,
-//     );
-//     print("File downloaded and saved.");
-//   } else {
-//     print("Failed to retrieve file data from Firebase.");
-//   }
-}
+List<Comment> comments = [
+  Comment(
+    profilePictureUrl: 'https://example.com/user1.jpg',
+    userName: 'Alice Johnson',
+    rating: 4.7,
+    date: 'Oct 20, 2024',
+    text: 'This app exceeded my expectations! Smooth and user-friendly.',
+    likes: 28,
+  ),
+  Comment(
+    profilePictureUrl: 'https://example.com/user1.jpg',
+    userName: 'Alice Johnson',
+    rating: 4.7,
+    date: 'Oct 20, 2024',
+    text: 'This app exceeded my expectations! Smooth and user-friendly.',
+    likes: 28,
+  ),
+];
 
+class CommentSection extends StatelessWidget {
+  const CommentSection({Key? key}) : super(key: key);
 
-Future<void> pickFile() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(
-    type: FileType.custom,
-    allowedExtensions: ['apk'],
-  );
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'User Reviews',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        SizedBox(height: 15),
 
-  if (result != null) {
-    print("File picked: ${result.files.single.name}");
-  } else {
-    print("No file selected");
+        // StreamBuilder to fetch comments from Firestore
+        StreamBuilder<DocumentSnapshot>(
+          stream: FirebaseFirestore.instance
+              .collection("setcomment")
+              .doc("X0fO6VONEG5DXsiOcpnG")
+              .snapshots(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return CircularProgressIndicator(); // Show loading indicator while waiting for data
+            }
+
+            if (!snapshot.hasData || !snapshot.data!.exists) {
+              return Text("No comments available"); // Message if no data found
+            }
+
+            // Retrieve the comments field as a list of dynamic items
+            List<dynamic> comments = snapshot.data!["allcomment"] as List?? [];
+
+            return ListView.builder(
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: comments.length,
+              itemBuilder: (context, index) {
+                return CommentWidget(comment: comments[index],index:index,);
+              },
+            );
+          },
+        ),
+      ],
+    );
   }
 }
 
 
+class CommentWidget extends StatefulWidget {
+  final int index;
+  final Map<String,dynamic> comment;
 
+  const CommentWidget({Key? key, required this.comment, required this.index}) : super(key: key);
+
+  @override
+  State<CommentWidget> createState() => _CommentWidgetState();
+}
+ bool likevalue = false;
+class _CommentWidgetState extends State<CommentWidget> {
+  @override
+  Widget build(BuildContext context) {
+    DateTime commentDate = (widget.comment['date'] as Timestamp).toDate();
+    String formattedDate = DateFormat('MMM dd, yyyy').format(commentDate);
+   
+    return Container(
+      margin: EdgeInsets.symmetric(vertical: 10),
+      padding: EdgeInsets.all(15),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 6,
+            offset: Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: Colors.amber,
+                backgroundImage: AssetImage("assets/anonimus.jpg"),
+                radius: 25,
+              ),
+              SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Anonymous",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  SizedBox(height: 5),
+                 Row(
+  children: [
+    // Generate stars based on the rating value
+    Row(
+      children: List.generate(
+        widget.comment["rating"],
+        (index) => Icon(Icons.star, color: Colors.orange, size: 18),
+      ),
+    ),
+    SizedBox(width: 5),
+    Text(
+      widget.comment["rating"].toString(),
+      style: TextStyle(
+        color: Colors.orange,
+        fontWeight: FontWeight.bold,
+        fontSize: 14,
+      ),
+    ),
+    SizedBox(width: 10),
+    Text(
+      formattedDate,
+      style: TextStyle(color: Colors.grey),
+    ),
+  ],
+),
+
+                ],
+              ),
+            ],
+          ),
+          SizedBox(height: 12),
+          Text(
+            widget.comment["comment"],
+            style: TextStyle(
+              fontSize: 15,
+              color: Colors.black87,
+              height: 1.4,
+            ),
+          ),
+          SizedBox(height: 12),
+          Divider(),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.thumb_up_alt_outlined, color: likevalue==false? Colors.grey:Colors.blue
+                     ),
+                    onPressed: () {
+                  
+
+                      incrementLike(widget.comment["like"],widget.index);
+                    },
+                  ),
+                  Text(widget.comment["like"].toString(),
+                      style: TextStyle(color: Colors.black54)),
+                ],
+              ),
+              IconButton(
+                icon: Icon(Icons.more_vert, color: Colors.grey),
+                onPressed: () {
+                 
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  void incrementLike(int like,int index) async {
+  if(likevalue==false){
+setState(() {
+    
+  });
+  }else{
+ like -= 1;
+  }
+
+  likevalue=!likevalue;
+  
+  
+  // Update the 'likes' field in Firestore for this comment
+  await FirebaseFirestore.instance
+      .collection("setcoment")
+      .doc("X0fO6VONEG5DXsiOcpnG") // Replace with actual document ID
+      .update({
+    'allcomment':[index][like], // Update the likes count
+  });
+}
+}
+
+class Comment {
+  final String profilePictureUrl;
+  final String userName;
+  final double rating;
+  final String date;
+  final String text;
+  final int likes;
+
+  Comment({
+    required this.profilePictureUrl,
+    required this.userName,
+    required this.rating,
+    required this.date,
+    required this.text,
+    required this.likes,
+  });
+}
+
+
+
+
+
+  
 

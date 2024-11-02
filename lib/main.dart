@@ -2,14 +2,15 @@ import 'package:appstore/appdetailspage.dart';
 import 'package:appstore/firebase_options.dart';
 import 'package:appstore/homepage.dart';
 import 'package:appstore/secondpage.dart';
+import 'package:appstore/videoplayertest.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main()  {
+void main() async{
   WidgetsFlutterBinding.ensureInitialized();
 
   try {
-   Firebase.initializeApp(
+  await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
     runApp(const AppStoreWeb());
@@ -24,13 +25,14 @@ class AppStoreWeb extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Professional App Store',
       theme: AppTheme.theme,
       initialRoute: '/',
       routes: {
-        '/': (context) => const HomePage(),
+        '/': (context) =>  YoutubePlayerDemoApp(),
         '/category': (context) => const CategoryPage(),
-        '/appDetail': (context) => const AppDetailPage(),
+        '/appDetail': (context) =>  AppDetailPage(),
       },
     );
   }
